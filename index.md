@@ -1,37 +1,142 @@
-## Welcome to GitHub Pages
+# Arch Linux Installation
 
-You can use the [editor on GitHub](https://github.com/loganhood/archInstallation/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+## Verify internet connection with:
+```
+ping google.com
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+## Update system clock:
+```
+timedatectl set-ntp true
+```
 
-### Jekyll Themes
+Verify service status with:
+```
+timedatectl status
+```
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/loganhood/archInstallation/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+## Partition disk
+List available drives:
+```
+fdisk -l
+```
 
-### Support or Contact
+Begin partitioning tables:
+```
+fdisk /dev/
+```
+Type `m` when help is needed.
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+Since we are doing a EFI partition, press `g` to create a GPT partition table.
+
+Type `n` to add a new parition.
+
+First parition number type `1`.
+
+Next press enter to leave first sector as default.
+
+This parition is our EFI Partition, so type `500M` to make this partition 500 MB.
+
+Type `n` to again to add another parition.
+
+Type `2`.
+
+Once again press enter to leave first sector as default.
+
+This parition is for the Arch OS, so press enter to allocate the remainder of the disk.
+
+We must change the partition type of the first partition.
+1. Press `t`.
+2. Press `1` to select the first partition.
+3. Press `1` to change this partition type to an EFI System.
+
+Now we can press `w` to write the table to the desk and exit fdisk.
+
+## Format Partitions
+To set up the file system for our EFI partition:
+```
+mkfs.fat -F32 /dev/sda1
+```
+
+For our root partition:
+```
+mkfs.ext4 /dev/sda2
+```
+Now we must mount our root partition:
+```
+mount /dev/sda2 /mnt
+```
+
+## Installation
+To install the essential packages for Arch:
+```
+pacstrap /mnt base linux linux-firmware
+```
+
+## Configuring the System
+Generate an fstab file:
+```
+genfstab -U /mnt >> /mnt/etc/fstab
+```
+
+Change into the root of the new Arch system:
+```
+arch-chroot /mnt
+```
+We are logged in as root on our root partition /sda2.
+- Note: You must be in this directory for the remainder of this guide.
+
+Find your timezone with:
+```
+ls /usr/share/zoneinfo/
+```
+Use this to find your REGION and CITY, and the set your timezone using:
+```
+ln -sf /usr/share/zoneinfo/REGION/CITY /etc/localtime
+```
+Set hardware clock:
+```
+hwclock --systohc
+```
+
+### Localization
+Install nano:
+```
+pacman -S nano
+```
+Edit `/etc/locale.gen`:
+```
+nano /etc/locale.gen
+```
+Now uncomment your locale. For those in America, uncomment `en_US.UTF-8 UTF-8`. Save and exit the file.
+
+Now run:
+```
+locale-gen
+```
+## Network Configuration
+Find your _hostname_ in the hostname file:
+```
+cat /etc/hostname
+```
+Open the hosts file and add the following:
+```
+nano /etc/hosts
+```
+```
+127.0.0.1   localhost
+::1         localhost
+127.0.1.1	myhostname
+```
+- myhostname = what you found previously in the hostname file
+
+Save and close the file.
+
+## Root Password
+Set your root password:
+```
+passwd
+```
+
+## Install Boot Loader
+For this guide we will be using GRUB.
