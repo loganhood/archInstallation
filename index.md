@@ -23,7 +23,7 @@ fdisk -l
 
 Begin partitioning tables:
 ```
-fdisk /dev/
+fdisk /dev/sda
 ```
 Type `m` when help is needed.
 
@@ -35,7 +35,7 @@ First parition number type `1`.
 
 Next press enter to leave first sector as default.
 
-This parition is our EFI Partition, so type `500M` to make this partition 500 MB.
+This parition is our EFI Partition, so type `+500M` to make this partition 500 MB.
 
 Type `n` to again to add another parition.
 
@@ -115,9 +115,10 @@ Now run:
 locale-gen
 ```
 ## Network Configuration
-Find your _hostname_ in the hostname file:
+Create the hostname file and add a hostname:
 ```
-cat /etc/hostname
+nano /etc/hostname
+hostname
 ```
 Open the hosts file and add the following:
 ```
@@ -126,7 +127,7 @@ nano /etc/hosts
 ```
 127.0.0.1   localhost
 ::1         localhost
-127.0.1.1	myhostname
+127.0.1.1	myhostname.localdomain  myhostname
 ```
 - myhostname = what you found previously in the hostname file
 
@@ -140,3 +141,40 @@ passwd
 
 ## Install Boot Loader
 For this guide we will be using GRUB.
+
+Install GRUB and efibootmgr:
+```
+pacman -S grub efibootmgr
+```
+Mount the EFI system partition:
+```
+mkdir /boot/efi
+mount /dev/sda1 /boot/efi
+```
+Install the GRUB EFI application and its modules:
+```
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
+```
+Generate GRUB configuration file:
+```
+grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+## Network Configuration
+Install and enable DHCP:
+```
+pacman -S dhcpcd
+systemctl enable dhcpcd
+```
+Install and enable NetworkManager
+```
+pacman -S networkmanager
+systemctl enable NetworkManager
+```
+
+## Reboot System:
+```
+exit
+umount -l /mnt
+reboot
+```
