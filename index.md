@@ -172,9 +172,59 @@ pacman -S networkmanager
 systemctl enable NetworkManager
 ```
 
+## Add sudo users
+Create users using the following commands:
+```
+useradd -m username
+passwd username
+usermod -aG wheel username
+```
+Install sudo:
+```
+pacman -S sudo
+```
+Open the visudo file with the following command and uncomment the line that says `%wheel ALL=(ALL) ALL`.
+```
+EDITOR=nano visudo
+```
+
+If we want to make a user change their password after login:
+```
+passwd -e username
+```
+
 ## Reboot System:
 ```
 exit
 umount -l /mnt
 reboot
 ```
+
+## Install Desktop Environment
+For this installation we will install KDE Plasma.
+
+Install the following packages:
+```
+sudo pacman -S xorg sddm plasma kde-applications
+```
+Enable the Display Manager and Network Manager services:
+```
+sudo systemctl enable sddm.service
+sudo systemctl enable NetworkManager.service
+```
+Now reboot.
+
+## Add Aliases:
+Open the .bashrc file:
+```
+nano ~/.bashrc
+```
+Add the alias to the file and save. For this example, we will add an alias that shows important memory information.
+```
+alias meminfo='free -m -l -t'
+```
+Source the .bashrc file for the aliases to start working.
+```
+. ~/.bashrc
+```
+
