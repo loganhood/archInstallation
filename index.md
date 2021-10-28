@@ -25,25 +25,25 @@ Begin partitioning tables:
 ```
 fdisk /dev/sda
 ```
-Type `m` when help is needed.
+- Note: Type `m` when help is needed.
 
-Since we are doing a EFI partition, press `g` to create a GPT partition table.
+1. Since we are doing a EFI partition, press `g` to create a GPT partition table.
 
-Type `n` to add a new parition.
+2. Type `n` to add a new parition.
 
-First parition number type `1`.
+3. First parition number type `1`.
 
-Next press enter to leave first sector as default.
+4. Next press enter to leave first sector as default.
 
-This parition is our EFI Partition, so type `+500M` to make this partition 500 MB.
+5. This parition is our EFI Partition, so type `+500M` to make this partition 500 MB.
 
-Type `n` to again to add another parition.
+6. Type `n` to again to add another parition.
 
-Type `2`.
+7. Type `2`.
 
-Once again press enter to leave first sector as default.
+8. Once again press enter to leave first sector as default.
 
-This parition is for the Arch OS, so press enter to allocate the remainder of the disk.
+9. This parition is for the Arch OS, so press enter to allocate the remainder of the disk.
 
 We must change the partition type of the first partition.
 1. Press `t`.
@@ -227,4 +227,3 @@ Source the .bashrc file for the aliases to start working.
 ```
 . ~/.bashrc
 ```
-
